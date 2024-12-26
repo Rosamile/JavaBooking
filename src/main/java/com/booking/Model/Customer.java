@@ -1,6 +1,7 @@
 package com.booking.Model;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class Customer {
 
@@ -8,17 +9,23 @@ public class Customer {
    private String lastName;
    private int age;
    private LocalDate birthdate;
-   private String id;
+   private UUID id;
+   private  String nationality;
+   private  String phone;
+   private  String email;
 
-    public Customer(int i, LocalDate localDate, String juan, String perez) {
+    public Customer() {
     }
 
-    public Customer(int age, LocalDate birthdate, String firstName, String id, String lastName) {
+    public Customer(int age, LocalDate birthdate, String email, String firstName, UUID id, String lastName, String nationality, String phone) {
         this.age = age;
         this.birthdate = birthdate;
+        this.email = email;
         this.firstName = firstName;
         this.id = id;
         this.lastName = lastName;
+        this.nationality = nationality;
+        this.phone = phone;
     }
 
     public int getAge() {
@@ -37,6 +44,14 @@ public class Customer {
         this.birthdate = birthdate;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -45,11 +60,11 @@ public class Customer {
         this.firstName = firstName;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -59,5 +74,21 @@ public class Customer {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
