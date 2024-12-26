@@ -63,10 +63,45 @@ public class Main {
 
             if(update) {
                 service.delete(toUpdate);
-                // create new reserve
+                System.out.println("Crear nueva reserva");
+
+                System.out.println("Ingrese nombre");
+                String nameIn = in.next();
+                System.out.println("Ingrese apellido");
+                String lastNameIn = in.next();
+                System.out.println("Ingrese nacionalidad");
+                String nationalityIn = in.next();
+                System.out.println("Ingrese fecha de nacimiento");
+                String birthdateIn = in.next();
+                System.out.println("Ingrese telefono");
+                String phoneIn = in.next();
+                System.out.println("Ingrese email");
+                String emailIn = in.next();
+                System.out.println("Ingrese fecha de llegada");
+                String arrivalTimeIn = in.next();
+                System.out.println("Ingrese fecha de ingreso");
+                String startDateIn = in.next();
+                System.out.println("Ingrese fecha de salida");
+                String endDateIn = in.next();
+                System.out.println("Ingrese alojamiento");
+                String placeIn = in.next();
+                System.out.println("Ingrese habitacion");
+                String roomIn = in.next();
+
+                service.reserve(nameIn, lastNameIn, nationalityIn, toLocalDate(birthdateIn),phoneIn,emailIn, toLocalDateTime(arrivalTimeIn),toLocalDate(startDateIn), toLocalDate(endDateIn),placeIn,roomIn);
             }
         } else {
             System.out.println("Usuario invalido");
         }
+    }
+
+    public static LocalDate toLocalDate(String date) {
+        String[] parts = date.split("/");
+        return LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+    }
+
+    public static LocalDateTime toLocalDateTime(String date) {
+        String[] parts = date.split("/");
+        return LocalDateTime.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]),Integer.parseInt(parts[4]));
     }
 }
