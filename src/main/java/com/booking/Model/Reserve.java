@@ -1,9 +1,11 @@
 package com.booking.Model;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 public class Reserve {
+    private UUID id;
     private Customer customer;
     private Room reserveRoom;
     private LocalDate startDateReserve;
@@ -20,9 +22,7 @@ public class Reserve {
     public Reserve() {
     }
 
-    public Reserve(String activity, String alimentPack, LocalDate confirmationDate, Customer customer,
-                   LocalDate endDateReserve, LocalDate finalEndDate, Room finalRoom, LocalDate finalStartDate,
-                   LocalDate reserveDate, Room reserveRoom, LocalDate startDateReserve, String stateReserve) {
+    public Reserve(String activity, String alimentPack, LocalDate confirmationDate, Customer customer, LocalDate endDateReserve, LocalDate finalEndDate, Room finalRoom, LocalDate finalStartDate, UUID id, LocalDate reserveDate, Room reserveRoom, LocalDate startDateReserve, String stateReserve) {
         this.activity = activity;
         this.alimentPack = alimentPack;
         this.confirmationDate = confirmationDate;
@@ -31,6 +31,7 @@ public class Reserve {
         this.finalEndDate = finalEndDate;
         this.finalRoom = finalRoom;
         this.finalStartDate = finalStartDate;
+        this.id = id;
         this.reserveDate = reserveDate;
         this.reserveRoom = reserveRoom;
         this.startDateReserve = startDateReserve;
@@ -99,6 +100,14 @@ public class Reserve {
 
     public void setFinalStartDate(LocalDate finalStartDate) {
         this.finalStartDate = finalStartDate;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public LocalDate getReserveDate() {

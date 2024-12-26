@@ -3,17 +3,19 @@ package com.booking.Service;
 import com.booking.Model.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class CustomerService {
 
+    private List<Lodgement> places = new ArrayList<>();
+    private List<Reserve> reserves = new ArrayList<>();
 
-    public List<Result> filter(String city, String type, LocalDate startDate, LocalDate endDate, int kids, int adult, int rooms) {
-
-        List<Lodgement> places = new ArrayList<>();
+    public CustomerService() {
         Room standard = new Room(UUID.randomUUID(), 20000, "Standard",
                 "La habitación sencilla cuenta con una cama individual, aire acondicionado, escritorio," +
                         " TV de pantalla plana, cafetera, y baño privado con ducha.", 4);
@@ -100,19 +102,75 @@ public class CustomerService {
         places.add(place2);
         places.add(place3);
         places.add(place4);
+    }
 
+    public List<Reserve> validUser(String email, String birthdate) {
+        List<Reserve> results = new ArrayList<>();
+
+        for(Reserve reserve: reserves) {
+            Customer customer = reserve.getCustomer();
+            String[] parts = birthdate.split("/");
+            LocalDate birthdate1 = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+            if(customer.getEmail().equalsIgnoreCase(email) && customer.getBirthdate().isEqual(birthdate1)) {
+                results.add(reserve);
+            }
+        }
+
+        return results;
+    }
+
+    public String reserve (String firstName, String lastName, String nationality, LocalDate birthdate, String phone, String email,
+                           LocalDateTime arriveTime, LocalDate startDate, LocalDate endDate, String place, String room){
+
+        Customer customer = new Customer();
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+        customer.setNationality(nationality);
+        customer.setBirthdate(birthdate);
+        customer.setPhone(phone);
+        customer.setEmail(email);
+
+        Reserve reserve = new Reserve();
+        reserve.setId(UUID.randomUUID());
+        reserve.setStartDateReserve(startDate);
+        reserve.setEndDateReserve(endDate);
+        reserve.setCustomer(customer);
+
+        for(Lodgement place1: places) {
+            if (place1.getName().equalsIgnoreCase(place)) {
+                for (Room room1 : place1.getRooms()) {
+                    if (room1.getTypeRoom().equalsIgnoreCase(room)) {
+                        reserve.setReserveRoom(room1);
+                    }
+                }
+            }
+        }
+
+        reserves.add(reserve);
+
+        return "Se ha realizado la reserva con éxito: " + reserve.getId();
+    }
+
+    public List<Result> filter(String city, String type, LocalDate startDate, LocalDate endDate, int kids, int adult, int rooms) {
         List<Result> results = new ArrayList<>();
-        List<Reserve> reserves = new ArrayList<>();
 
         if(type.equalsIgnoreCase("Día de sol")){
-            Result result = new Result();
-            result.setName(place4.getName());
-            result.setQualification(place4.getQualification());
-            result.setActivities(place4Activities);
-            result.setFood(place4.getFood());
-            results.add(result);
-            return results;
+            Lodgement place4 = places.stream()
+                    .filter(place -> place.getName().equalsIgnoreCase("El escondite"))
+                    .findFirst()
+                    .orElse(null);
+
+            if(place4 != null) {
+                Result result = new Result();
+                result.setName(place4.getName());
+                result.setQualification(place4.getQualification());
+                result.setActivities(place4.getActivities());
+                result.setFood(place4.getFood());
+                results.add(result);
+                return results;
+            }
         }
+
         for (Lodgement place : places) {
             if (place.getCity().equalsIgnoreCase(city) && place.getType().equalsIgnoreCase(type)) {
                 int total = kids + adult;
@@ -228,6 +286,11 @@ public class CustomerService {
     }
 
 
+    public void delete(UUID toUpdate) {
+        reserves = reserves.stream()
+                .filter(reserve -> reserve.getId()!= toUpdate)
+                .collect(Collectors.toList());
+    }
 }
 
 
