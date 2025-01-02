@@ -1,117 +1,49 @@
 package com.booking.Service;
 
 import com.booking.Model.*;
+import com.booking.Util.DataUtil;
 
+import java.security.Provider;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 
 public class CustomerService {
 
-    private List<Lodgement> places = new ArrayList<>();
-    private List<Reserve> reserves = new ArrayList<>();
+    private static CustomerService instance;
 
-    public CustomerService() {
-        Room standard = new Room(UUID.randomUUID(), 20000, "Standard",
-                "La habitación sencilla cuenta con una cama individual, aire acondicionado, escritorio," +
-                        " TV de pantalla plana, cafetera, y baño privado con ducha.", 4);
-
-        Room doubleRoom = new Room(UUID.randomUUID(), 35000, "Double",
-                "La habitación doble tiene 2 camas dobles, vista al mar, " +
-                        "aire acondicionado, cafetera, Tv de pantalla plana, ducha y escritorio.\n", 5);
-
-        Room family = new Room(UUID.randomUUID(), 50000, "Family", "Cuenta con una cama " +
-                "king size y dos camas individuales, aire acondicionado, TV de pantalla plana, cafetera, " +
-                "minibar, y baño privado con ducha", 8);
-
-        Room suite = new Room(UUID.randomUUID(), 80000, "Suite", "Incluye una cama king size," +
-                " vistas panorámicas a la ciudad o al mar, aire acondicionado, TV de pantalla plana, cafetera," +
-                " minibar, y baño privado con ducha y bañera.", 4);
-        Room triple = new Room(UUID.randomUUID(), 60000, "Triple", "Dispone de tres camas " +
-                "individuales, aire acondicionado, TV de pantalla plana, cafetera, minibar, y baño privado con ducha", 6);
-
-        List<Room> place1Rooms = new ArrayList<>();
-        place1Rooms.add(standard);
-        place1Rooms.add(doubleRoom);
-        place1Rooms.add(family);
-        place1Rooms.add(suite);
-        place1Rooms.add(triple);
-
-        List<String> place1Activities = List.of("playa", "parque", "tour");
-        List<String> place2Activities = List.of("piscina", "caballo", "tour");
-        List<String> place3Activities = List.of("piscina", "spa", "parque", "tour");
-        List<String> place4Activities = List.of("piscina");
-
-        List<Room> place2Rooms = new ArrayList<>();
-        place2Rooms.add(standard);
-        place2Rooms.add(doubleRoom);
-        place2Rooms.add(family);
-        place2Rooms.add(suite);
-        place2Rooms.add(triple);
-
-        List<Room> place3Rooms = new ArrayList<>();
-        place3Rooms.add(standard);
-        place3Rooms.add(doubleRoom);
-        place3Rooms.add(family);
-        place3Rooms.add(suite);
-        place3Rooms.add(triple);
-
-        List<Room> place4Rooms = new ArrayList<>();
-        place4Rooms.add(standard);
-
-        Lodgement place1 = new Lodgement(
-                "Cartagena",
-                "Americas",
-                "5",
-                place1Rooms,
-                "Hotel",
-                place1Activities,
-                "desayuno"
-        );
-
-        Lodgement place2 = new Lodgement("Medellin",
-                "Heliconia",
-                "4",
-                place2Rooms,
-                "Finca",
-                place2Activities,
-                "desayuno"
-        );
-
-        Lodgement place3 = new Lodgement("Bogotá",
-                "Dorado",
-                "4",
-                place3Rooms,
-                "Apartamento",
-                place3Activities,
-                "desayuno");
-
-        Lodgement place4 = new Lodgement("Villavicencio",
-                "El escondite",
-                "5",
-                place4Rooms,
-                "Día de sol",
-                place4Activities,
-                "refrigerio");
-
-        places.add(place1);
-        places.add(place2);
-        places.add(place3);
-        places.add(place4);
+    public static CustomerService getInstance() {
+        if (instance == null) {
+            instance = new CustomerService();
+            instance.init();
+        }
+        return instance;
     }
 
-    public List<Reserve> validUser(String email, String birthdate) {
+
+    private List<Place> places = new ArrayList<>();
+    private List<Reserve> reserves = new ArrayList<>();
+
+    private CustomerService() {
+
+    }
+
+    private void init() {
+        this.places = DataUtil.getPlaces();
+    }
+
+    public List<Reserve> validUser(String email, LocalDate birthdate) {
         List<Reserve> results = new ArrayList<>();
 
-        for(Reserve reserve: reserves) {
+        for (Reserve reserve : reserves) {
             Customer customer = reserve.getCustomer();
-            String[] parts = birthdate.split("/");
-            LocalDate birthdate1 = LocalDate.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-            if(customer.getEmail().equalsIgnoreCase(email) && customer.getBirthdate().isEqual(birthdate1)) {
+
+            if (customer.getEmail().equalsIgnoreCase(email) && customer.getBirthdate().isEqual(birthdate)) {
                 results.add(reserve);
             }
         }
@@ -119,168 +51,107 @@ public class CustomerService {
         return results;
     }
 
-    public String reserve (String firstName, String lastName, String nationality, LocalDate birthdate, String phone, String email,
-                           LocalDateTime arriveTime, LocalDate startDate, LocalDate endDate, String place, String room){
-
-        Customer customer = new Customer();
-        customer.setFirstName(firstName);
-        customer.setLastName(lastName);
-        customer.setNationality(nationality);
-        customer.setBirthdate(birthdate);
-        customer.setPhone(phone);
-        customer.setEmail(email);
-
-        Reserve reserve = new Reserve();
-        reserve.setId(UUID.randomUUID());
-        reserve.setStartDateReserve(startDate);
-        reserve.setEndDateReserve(endDate);
-        reserve.setCustomer(customer);
-
-        for(Lodgement place1: places) {
-            if (place1.getName().equalsIgnoreCase(place)) {
-                for (Room room1 : place1.getRooms()) {
-                    if (room1.getTypeRoom().equalsIgnoreCase(room)) {
-                        reserve.setReserveRoom(room1);
-                    }
-                }
-            }
+    public List<Result> filter(PlaceDto placeDto) {
+        if (placeDto.getType().equalsIgnoreCase("Día de sol")) {
+            return sunDay();
         }
-
-        reserves.add(reserve);
-
-        return "Se ha realizado la reserva con éxito: " + reserve.getId();
-    }
-
-    public List<Result> filter(String city, String type, LocalDate startDate, LocalDate endDate, int kids, int adult, int rooms) {
         List<Result> results = new ArrayList<>();
+        int total = placeDto.getKids() + placeDto.getAdult();
 
-        if(type.equalsIgnoreCase("Día de sol")){
-            Lodgement place4 = places.stream()
-                    .filter(place -> place.getName().equalsIgnoreCase("El escondite"))
-                    .findFirst()
-                    .orElse(null);
-
-            if(place4 != null) {
-                Result result = new Result();
-                result.setName(place4.getName());
-                result.setQualification(place4.getQualification());
-                result.setActivities(place4.getActivities());
-                result.setFood(place4.getFood());
-                results.add(result);
-                return results;
-            }
-        }
-
-        for (Lodgement place : places) {
-            if (place.getCity().equalsIgnoreCase(city) && place.getType().equalsIgnoreCase(type)) {
-                int total = kids + adult;
-                for (Room room : place.getRooms()) {
-                    if (room.getCapacity() >= total) {
-                        boolean used = false;
-                        for (Reserve reserve : reserves) {
-
-                            if (reserve.getReserveRoom() == room && !free(reserve, startDate, endDate)) {
-                                used=true;
-
-                            }
-
-                        }
-                        if (!used){
-                            Result res = results.stream()
-                                    .filter(result -> result.getName().equalsIgnoreCase(place.getName())).findAny()
-                                    .orElse(null);
-
-                            if (res == null) {
-                                Result result = new Result();
-                                result.setName(place.getName());
-                                result.setQualification(place.getQualification());
-                                result.setPriceNight(room.getPrice());
-                                result.setPriceCalculate(calculatePrice(startDate, reserves, endDate, place, rooms));
-                                result.setActivities(place.getActivities());
-                                result.setFood(place.getFood());
-                                results.add(result);
-                            }
-                        }
-                    }
-                }
-            }
-
-
-        }
-
+        places.stream().filter(place -> placeMatches(place, placeDto)).forEach(place -> processRooms(results, place, total, placeDto));
         return results;
     }
 
-    private boolean free(Reserve reserve, LocalDate startDate, LocalDate endDate) {
+    private boolean placeMatches(Place place, PlaceDto placeDto) {
+        return place.getCity().equalsIgnoreCase(placeDto.getCity()) && place.getType().equalsIgnoreCase(placeDto.getType());
+    }
+
+    private void processRooms(List<Result> results, Place place, int total, PlaceDto placeDto) {
+        place.getRooms().stream().filter(room -> room.getCapacity() >= total && isRoomAvailable(room, placeDto))
+                .forEach(room -> getFilteredPlaces(results, place, room.getPrice(), placeDto, room));
+    }
+
+    private boolean isRoomAvailable(Room room, PlaceDto placeDto) {
+        return reserves.stream()
+                .noneMatch(reserve -> reserve.getReserveRoom() == room &&
+                        !isFree(reserve, placeDto.getStartDate(), placeDto.getEndDate()));
+    }
+
+    public void getFilteredPlaces(List<Result> results, Place place, double price, PlaceDto placeDto, Room room) {
+        Result result1 = (Result) results.stream()
+                .filter(result -> result.getName().equalsIgnoreCase(place.getName()))
+                .findAny()
+                .map(place1 -> null)
+                .orElse(buildResult(place, price, placeDto, room));
+
+        if (result1 != null) {
+            results.add(result1);
+        }
+    }
+
+    public Result buildResult(Place place, double price, PlaceDto placeDto, Room room) {
+        Result result = new Result();
+
+
+        PriceDto priceDto = new PriceDto(placeDto.getEndDate(), place, placeDto.getRooms(), placeDto.getStartDate());
+
+        result.setName(place.getName());
+        result.setQualification(place.getQualification());
+        result.setPriceNight(price);
+        result.setPriceCalculate(calculatePrice(priceDto));
+        result.setActivities(place.getActivities());
+        result.setFood(place.getFood());
+        result.setRoomName(room.getTypeRoom());
+
+        return result;
+    }
+
+    private boolean isFree(Reserve reserve, LocalDate startDate, LocalDate endDate) {
         LocalDate reservationStart = reserve.getStartDateReserve();
         LocalDate reservationEnd = reserve.getEndDateReserve();
-        if ((startDate.isAfter(reservationEnd) || startDate.isEqual(reservationEnd))
+        return ((startDate.isAfter(reservationEnd) || startDate.isEqual(reservationEnd))
                 || (endDate.isBefore(reservationStart)
-                || endDate.isEqual(reservationStart))) {
-            return true;
-        }
-        return false;
+                || endDate.isEqual(reservationStart)));
     }
 
     private boolean lastFiveDate(LocalDate startDate, LocalDate endDate) {
-
         int dayOfMonth1 = startDate.getDayOfMonth();
         int dayOfMonth2 = endDate.getDayOfMonth();
 
-        if (dayOfMonth1 >= 25 || dayOfMonth2 >= 31) {
-            return true;
-        }
-        return false;
-
+        return (dayOfMonth1 >= 25 || dayOfMonth2 == 31);
     }
 
     private boolean tenToFifteen(LocalDate startDate, LocalDate endDate) {
-
         int dayOfMonth1 = startDate.getDayOfMonth();
         int dayOfMonth2 = endDate.getDayOfMonth();
 
-        if (dayOfMonth1 >= 10 && dayOfMonth2 <= 15) {
-            return true;
-        }
-        return false;
+        return (dayOfMonth1 >= 10 && dayOfMonth2 <= 15);
     }
 
     private boolean fiveToTeen(LocalDate startDate, LocalDate endDate) {
-
         int dayOfMonth1 = startDate.getDayOfMonth();
         int dayOfMonth2 = endDate.getDayOfMonth();
 
-        if (dayOfMonth1 >= 10 && dayOfMonth2 <= 5) {
-            return true;
-        }
-        return false;
+        return (dayOfMonth1 >= 10 && dayOfMonth2 <= 5);
     }
 
-    private double calculatePrice(LocalDate startDate, List<Reserve> reserveList, LocalDate endDate, Lodgement lodgement, int rooms) {
+    private double calculatePrice(PriceDto priceDto) {
+        long days = DAYS.between(priceDto.getStartDate(), priceDto.getEndDate());
+        double basePrice = getRoomPrice(priceDto) * priceDto.getRooms();
+        return applyDiscountsAndSurcharges(basePrice, priceDto) * days;
+    }
 
-        double price = 0;
-        for (Room room : lodgement.getRooms()) {
-            boolean used = false;
-            for (Reserve reserve : reserveList) {
-                if (reserve.getReserveRoom() == room && !free(reserve, startDate, endDate)) {
-                    used = true;
-                }
-            }
-            if (!used) {
-                price = room.getPrice();
-                break;
-            }
-        }
-        price = price * rooms;
-
+    private double applyDiscountsAndSurcharges(double price, PriceDto priceDto) {
+        LocalDate startDate = priceDto.getStartDate();
+        LocalDate endDate = priceDto.getEndDate();
         if (lastFiveDate(startDate, endDate)) {
-            price = price + (price * 0.15);
+            price += price * 0.15;
         }
         if (tenToFifteen(startDate, endDate)) {
-            price = price + (price * 0.10);
+            price += price * 0.10;
         }
         if (fiveToTeen(startDate, endDate)) {
-            price = price - (price * 0.08);
+            price -= price * 0.08;
         }
         return price;
     }
@@ -288,9 +159,83 @@ public class CustomerService {
 
     public void delete(UUID toUpdate) {
         reserves = reserves.stream()
-                .filter(reserve -> reserve.getId()!= toUpdate)
+                .filter(reserve -> reserve.getId() != toUpdate)
                 .collect(Collectors.toList());
     }
+
+    public List<Result> sunDay() {
+
+        List<Result> results = new ArrayList<>();
+
+        Place place4 = places.stream()
+                .filter(placeObject -> placeObject.getName().equalsIgnoreCase("El escondite"))
+                .findFirst()
+                .orElse(null);
+
+        if (place4 != null) {
+            Result result = new Result();
+            result.setName(place4.getName());
+            result.setQualification(place4.getQualification());
+            result.setActivities(place4.getActivities());
+            result.setFood(place4.getFood());
+            results.add(result);
+        }
+
+        return results;
+    }
+
+    public double getRoomPrice(PriceDto priceDto) {
+        double price = 0;
+
+        for (Room roomPrice : priceDto.getPlace().getRooms()) {
+            if (!isReservedRoom(priceDto, roomPrice)) {
+                price = roomPrice.getPrice();
+                break;
+            }
+        }
+
+        return price;
+    }
+
+    public boolean isReservedRoom(PriceDto priceDto, Room room) {
+        return reserves.stream().anyMatch(reserve -> reserve.getReserveRoom() == room &&
+                !isFree(reserve, priceDto.getStartDate(), priceDto.getEndDate()));
+    }
+
+
+    public void reserve(RerserveDto rerserveDto) {
+
+        Customer customer = new Customer();
+        customer.setFirstName(rerserveDto.getFirstName());
+        customer.setLastName(rerserveDto.getLastName());
+        customer.setNationality(rerserveDto.getNationality());
+        customer.setBirthdate(rerserveDto.getBirthdate());
+        customer.setPhone(rerserveDto.getPhone());
+        customer.setEmail(rerserveDto.getEmail());
+
+        Reserve reserve = new Reserve();
+        reserve.setId(UUID.randomUUID());
+        reserve.setStartDateReserve(rerserveDto.getStartDate());
+        reserve.setEndDateReserve(rerserveDto.getEndDate());
+        reserve.setCustomer(customer);
+
+        for (Place place1 : places) {
+            if (place1.getName().equalsIgnoreCase(rerserveDto.getPlace())) {
+                for (Room room1 : place1.getRooms()) {
+                    if (room1.getTypeRoom().equalsIgnoreCase(rerserveDto.getRoom())) {
+                        reserve.setReserveRoom(room1);
+                    }
+                }
+            }
+        }
+
+        reserves.add(reserve);
+    }
+
+    public void getServe(RerserveDto rerserveDto) {
+
+    }
+
 }
 
 
