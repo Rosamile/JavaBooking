@@ -2,7 +2,8 @@ package com.booking.Model;
 
 import java.util.List;
 
-public class Lodgement {
+public class Place {
+
 
     private String city;
     private List<Room> rooms;
@@ -12,7 +13,7 @@ public class Lodgement {
     private List<String> activities;
     private String food;
 
-    public Lodgement(String city, String name, String qualification, List<Room> rooms, String type,   List<String> activities,  String food) {
+    public Place(String city, String name, String qualification, List<Room> rooms, String type, List<String> activities, String food) {
         this.activities = activities;
         this.city = city;
         this.food = food;
@@ -22,7 +23,7 @@ public class Lodgement {
         this.type = type;
     }
 
-    public Lodgement() {
+    public Place() {
     }
 
     public List<String> getActivities() {

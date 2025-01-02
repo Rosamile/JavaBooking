@@ -10,18 +10,28 @@ public class Result {
     private double priceCalculate;
     private List<String> activities;
     private String food;
+    private String roomName;
 
 
     public Result() {
     }
 
-    public Result(String name, double priceCalculate, double priceNight, String qualification, List<String> activities, String food) {
+    public Result(String name, double priceCalculate, double priceNight, String qualification, List<String> activities, String food, String roomName) {
         this.name = name;
         this.priceCalculate = priceCalculate;
         this.priceNight = priceNight;
         this.qualification = qualification;
         this.activities = activities;
         this.food = food;
+        this.roomName = roomName;
+    }
+
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
     }
 
     public String getName() {
